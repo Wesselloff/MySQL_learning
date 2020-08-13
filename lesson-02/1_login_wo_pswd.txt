@@ -1,0 +1,61 @@
+dennis@Artem-Comp:~$ ssh -i ~/.ssh/study_server den@10.10.1.120
+Welcome to Ubuntu 20.04.1 LTS (GNU/Linux 5.4.0-42-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Thu 13 Aug 2020 01:44:50 AM MSK
+
+  System load:  0.0                Processes:                121
+  Usage of /:   18.9% of 39.12GB   Users logged in:          0
+  Memory usage: 31%                IPv4 address for docker0: 172.17.0.1
+  Swap usage:   0%                 IPv4 address for enp0s3:  10.10.1.120
+
+ * Are you ready for Kubernetes 1.19? It's nearly here! Try RC3 with
+   sudo snap install microk8s --channel=1.19/candidate --classic
+
+   https://microk8s.io/ has docs and details.
+
+0 updates can be installed immediately.
+0 of these updates are security updates.
+
+
+Last login: Wed Aug 12 01:01:27 2020 from 10.10.1.111
+den@ubuntu-server:~$ 
+den@ubuntu-server:~$ vi .my.cnf
+den@ubuntu-server:~$ ll | grep cnf
+-rw-rw-r--  1 den  den      35 Aug 13 01:54 .my.cnf
+den@ubuntu-server:~$ cat .my.cnf 
+[client]
+user=root
+password=my8sql
+den@ubuntu-server:~$ mysql
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 13
+Server version: 8.0.21-0ubuntu0.20.04.4 (Ubuntu)
+
+Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.00 sec)
+
+mysql> 
+mysql> 
+mysql> exit
+Bye
+den@ubuntu-server:~$ 
