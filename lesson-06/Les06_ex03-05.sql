@@ -1,34 +1,30 @@
 -- 3. Определить кто больше поставил лайков (всего) - мужчины или женщины?
-SELECT p.gender,
-       count(1)
-  FROM likes l,
-       profiles p
- WHERE l.user_id = p.user_id
- GROUP BY p.gender
- ORDER BY 1 DESC;
+SELECT (SELECT p.gender FROM profiles p WHERE p.user_id = l.user_id) gender,
+        count(1)
+  FROM likes l
+  GROUP BY gender
+  ORDER BY 2 DESC
+  LIMIT 1;
  
 -- 4. Подсчитать общее количество лайков десяти самым молодым пользователям (сколько лайков получили 10 самых молодых пользователей).
-SELECT sum(t.likes_cnt) 
-  FROM (SELECT p.birthday,
-               p.user_id,
-               count(1) likes_cnt
-          FROM likes l,
-               profiles p
-         WHERE l.user_id = p.user_id
-         GROUP BY p.birthday, p.user_id 
-         ORDER BY 1 DESC
-         LIMIT 10) t;
-         
+SELECT sum(lc.like_cnt)
+  FROM (SELECT (SELECT count(1) 
+                  FROM likes l 
+                 WHERE l.target_id = p.user_id 
+                   AND l.target_type_id = 2
+               ) like_cnt
+          FROM profiles p
+         ORDER BY p.birthday DESC 
+         LIMIT 10
+       ) lc;
 -- 5. Найти 10 пользователей, которые проявляют наименьшую активность в использовании социальной сети
 --    (критерии активности необходимо определить самостоятельно).
 
 SELECT u.id,
-       count(p.id)
+       (SELECT count(1) FROM posts p WHERE p.user_id = u.id) post_cnt
   FROM users u
-  LEFT JOIN posts p
-    ON p.user_id  = u.id
- GROUP BY u.id 
- ORDER BY 2
- LIMIT 10;
+  ORDER BY 2, 1 
+  LIMIT 10;
+   
   
  
