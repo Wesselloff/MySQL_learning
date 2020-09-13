@@ -5,7 +5,7 @@ SELECT p.gender,
        profiles p
  WHERE l.user_id = p.user_id
  GROUP BY p.gender
- ORDER BY 1 DESC
+ ORDER BY 2 DESC
  LIMIT 1;
  
 -- 2. Подсчитать общее количество лайков десяти самым молодым пользователям (сколько лайков получили 10 самых молодых пользователей).
