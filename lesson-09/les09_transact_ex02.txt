@@ -1,0 +1,69 @@
+------ Создайте представление, которое выводит название name товарной позиции из таблицы products и соответствующее название каталога name из таблицы catalogs.
+
+den@ubuntu-server:~$ mysql
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 15
+Server version: 8.0.21-0ubuntu0.20.04.4 (Ubuntu)
+
+Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use shop;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> select id, name, catalog_id from products;
++----+-------------------------+------------+
+| id | name                    | catalog_id |
++----+-------------------------+------------+
+|  1 | Intel Core i3-8100      |          1 |
+|  2 | Intel Core i5-7400      |          1 |
+|  3 | AMD FX-8320E            |          1 |
+|  4 | AMD FX-8320             |          1 |
+|  5 | ASUS ROG MAXIMUS X HERO |          2 |
+|  6 | Gigabyte H310M S2H      |          2 |
+|  7 | MSI B250M GAMING PRO    |          2 |
++----+-------------------------+------------+
+7 rows in set (0.01 sec)
+
+mysql> select * from catalogs;
++----+-------------------------------------+
+| id | name                                |
++----+-------------------------------------+
+|  1 | Процессоры                          |
+|  2 | Материнские платы                   |
+|  3 | Видеокарты                          |
+|  4 | Жесткие диски                       |
+|  5 | Оперативная память                  |
++----+-------------------------------------+
+5 rows in set (0.00 sec)
+
+mysql> create view product_with_catalog as
+    -> SELECT p.name product_name,
+    ->        c.name catalog_name
+    ->   FROM products p,
+    ->        catalogs c
+    ->  WHERE c.id = p.catalog_id;
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> select * from product_with_catalog;
++-------------------------+-----------------------------------+
+| product_name            | catalog_name                      |
++-------------------------+-----------------------------------+
+| Intel Core i3-8100      | Процессоры                        |
+| Intel Core i5-7400      | Процессоры                        |
+| AMD FX-8320E            | Процессоры                        |
+| AMD FX-8320             | Процессоры                        |
+| ASUS ROG MAXIMUS X HERO | Материнские платы                 |
+| Gigabyte H310M S2H      | Материнские платы                 |
+| MSI B250M GAMING PRO    | Материнские платы                 |
++-------------------------+-----------------------------------+
+7 rows in set (0.00 sec)
+
+mysql> 
