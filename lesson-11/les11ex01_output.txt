@@ -1,0 +1,145 @@
+den@ubuntu-server:~$ mysql
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 17
+Server version: 8.0.21-0ubuntu0.20.04.4 (Ubuntu)
+
+Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use shop;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> CREATE TABLE logs
+    -> (
+    ->   id serial,
+    ->   table_name varchar(255) comment 'Название логируемой таблицы',
+    ->   out_id bigint UNSIGNED comment 'ID добавленной записи в логируемую таблицу',
+    ->   name varchar(255) comment 'Значение поля "NAME" логируемой таблицы',
+    ->   created_at datetime DEFAULT current_timestamp comment 'Дата и время добавления записи'
+    -> ) 
+    -> comment = 'Архивные данные' 
+    -> engine = archive;
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> show table status like 'logs'\G
+*************************** 1. row ***************************
+           Name: logs
+         Engine: ARCHIVE
+        Version: 10
+     Row_format: Compressed
+           Rows: 0
+ Avg_row_length: 2066
+    Data_length: 117
+Max_data_length: 0
+   Index_length: 0
+      Data_free: 0
+ Auto_increment: 1
+    Create_time: 2020-09-24 02:57:35
+    Update_time: 2020-09-24 02:57:35
+     Check_time: NULL
+      Collation: utf8mb4_0900_ai_ci
+       Checksum: NULL
+ Create_options: 
+        Comment: Архивные данные
+1 row in set (0.01 sec)
+
+mysql> delimiter //
+mysql> CREATE PROCEDURE add_log (p_table_name varchar(255), p_out_id bigint UNSIGNED, p_name varchar(255))
+    -> BEGIN
+    ->   INSERT INTO logs (table_name, out_id, name)
+    ->     VALUES (p_table_name, p_out_id, p_name);
+    -> END// 
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> 
+mysql> CREATE TRIGGER on_ai_products AFTER INSERT ON products FOR EACH ROW BEGIN
+    ->   CALL add_log('Products', NEW.id, NEW.name);
+    -> END//
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> 
+mysql> CREATE TRIGGER on_ai_users AFTER INSERT ON users FOR EACH ROW BEGIN
+    ->   CALL add_log('Users', NEW.id, NEW.name);
+    -> END//
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> 
+mysql> CREATE TRIGGER on_ai_catalogs AFTER INSERT ON catalogs FOR EACH ROW BEGIN
+    ->   CALL add_log('Catalogs', NEW.id, NEW.name);
+    -> END//
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> 
+mysql> delimiter ;
+mysql> 
+mysql> INSERT INTO users (name) VALUES ('Петр Петрович');
+Query OK, 1 row affected (0.03 sec)
+
+mysql> SELECT * FROM users;
++----+---------------------------+-------------+---------------------+---------------------+
+| id | name                      | birthday_at | created_at          | updated_at          |
++----+---------------------------+-------------+---------------------+---------------------+
+|  2 | Наталья                   | 1984-11-12  | 2020-09-06 02:58:45 | 2020-09-06 02:58:45 |
+|  3 | Александр                 | 1985-05-20  | 2020-09-06 02:58:45 | 2020-09-06 02:58:45 |
+|  4 | Сергей                    | 1988-02-14  | 2020-09-06 02:58:45 | 2020-09-06 02:58:45 |
+|  5 | Иван                      | 1998-01-12  | 2020-09-06 02:58:45 | 2020-09-06 02:58:45 |
+|  6 | Мария                     | 1992-08-29  | 2020-09-06 02:58:45 | 2020-09-06 02:58:45 |
+|  7 | Василий                   | 1981-05-07  | 2020-09-14 05:49:33 | 2020-09-14 05:49:33 |
+|  8 | Петр Петрович             | NULL        | 2020-09-24 03:00:45 | 2020-09-24 03:00:45 |
++----+---------------------------+-------------+---------------------+---------------------+
+7 rows in set (0.00 sec)
+
+mysql> INSERT INTO catalogs (name) VALUES ('Клавиатуры');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> SELECT * FROM catalogs;
++----+-------------------------------------+
+| id | name                                |
++----+-------------------------------------+
+|  1 | Процессоры                          |
+|  2 | Материнские платы                   |
+|  3 | Видеокарты                          |
+|  4 | Жесткие диски                       |
+|  5 | Оперативная память                  |
+|  6 | Клавиатуры                          |
++----+-------------------------------------+
+6 rows in set (0.00 sec)
+
+mysql> INSERT INTO products (name, description, price, catalog_id)
+    ->   VALUES ('Microsoft Natural Ergonomic Keyboard 4000', 'Клавиатура Microsoft изогнутая', 5000, 6);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> SELECT id, name, price, catalog_id FROM products;
++----+-------------------------------------------+----------+------------+
+| id | name                                      | price    | catalog_id |
++----+-------------------------------------------+----------+------------+
+|  1 | Intel Core i3-8100                        |  7890.00 |          1 |
+|  2 | Intel Core i5-7400                        | 12700.00 |          1 |
+|  3 | AMD FX-8320E                              |  4780.00 |          1 |
+|  4 | AMD FX-8320                               |  7120.00 |          1 |
+|  5 | ASUS ROG MAXIMUS X HERO                   | 19310.00 |          2 |
+|  6 | Gigabyte H310M S2H                        |  4790.00 |          2 |
+|  7 | MSI B250M GAMING PRO                      |  5060.00 |          2 |
+|  9 | NULL                                      |     NULL |       NULL |
+| 10 | Microsoft Natural Ergonomic Keyboard 4000 |  5000.00 |          6 |
++----+-------------------------------------------+----------+------------+
+9 rows in set (0.00 sec)
+
+mysql> SELECT * FROM logs;
++----+------------+--------+-------------------------------------------+---------------------+
+| id | table_name | out_id | name                                      | created_at          |
++----+------------+--------+-------------------------------------------+---------------------+
+|  1 | Users      |      8 | Петр Петрович                             | 2020-09-24 03:00:45 |
+|  2 | Catalogs   |      6 | Клавиатуры                                | 2020-09-24 03:05:40 |
+|  3 | Products   |     10 | Microsoft Natural Ergonomic Keyboard 4000 | 2020-09-24 03:10:03 |
++----+------------+--------+-------------------------------------------+---------------------+
+3 rows in set (0.00 sec)
+
+mysql> 
